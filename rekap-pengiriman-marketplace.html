@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rekap Pengiriman Marketplace</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --panel-soft: #f0f3f7;
+      --text: #1d2630;
+      --muted: #647180;
+      --line: #dce2e8;
+      --accent: #0f8f7a;
+      --accent-strong: #0a6f61;
+      --danger: #b42318;
+      --shadow: 0 18px 50px rgba(31, 42, 55, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, rgba(15, 143, 122, 0.08), rgba(246, 247, 249, 0) 300px), var(--bg);
+      color: var(--text);
+    }
+    button, input, select { font: inherit; }
+    button { border: 0; cursor: pointer; }
+    .app { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 36px; }
+    header { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: end; margin-bottom: 20px; }
+    h1 { margin: 0 0 6px; font-size: clamp(26px, 4vw, 42px); line-height: 1.05; letter-spacing: 0; }
+    .subtitle { margin: 0; color: var(--muted); max-width: 680px; line-height: 1.5; }
+    .clock {
+      min-width: 240px;
+      padding: 14px 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    .clock span { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .clock strong { display: block; margin-top: 4px; font-size: 18px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 18px; align-items: start; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
+    .input-panel { padding: 18px; }
+    .section-title { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 16px; }
+    h2 { margin: 0; font-size: 18px; letter-spacing: 0; }
+    .hint { margin: 0; color: var(--muted); font-size: 13px; }
+    .market-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 4px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .tab { min-height: 46px; border-radius: 6px; background: transparent; color: var(--muted); font-weight: 700; }
+    .tab.active { background: var(--panel); color: var(--accent-strong); box-shadow: 0 5px 16px rgba(31, 42, 55, 0.08); }
+    .quick-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    label { display: grid; gap: 7px; color: var(--muted); font-size: 13px; font-weight: 650; }
+    input, select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px 11px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 143, 122, 0.14); }
+    .service-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .service-input { padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    .service-input label { color: var(--text); font-size: 14px; line-height: 1.3; }
+    .service-input input { margin-top: 9px; font-size: 20px; font-weight: 750; }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+    .button-group { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 7px;
+      padding: 10px 14px;
+      font-weight: 760;
+      background: var(--panel-soft);
+      color: var(--text);
+    }
+    .btn svg { width: 17px; height: 17px; stroke-width: 2.2; }
+    .btn.primary { background: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent-strong); }
+    .btn.danger { color: var(--danger); background: #fff1f0; }
+    .summary { display: grid; gap: 14px; }
+    .total-card { padding: 16px; }
+    .total-value { display: block; margin: 8px 0 4px; font-size: 42px; font-weight: 850; line-height: 1; color: var(--accent-strong); }
+    .breakdown { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+    .metric { padding: 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-soft); }
+    .metric span { display: block; color: var(--muted); font-size: 12px; }
+    .metric strong { display: block; margin-top: 5px; font-size: 24px; }
+    .service-summary { display: grid; gap: 10px; margin-top: 14px; }
+    .history-panel { overflow: hidden; }
+    .history-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+    .table-wrap { overflow: auto; max-height: 430px; }
+    table { width: 100%; border-collapse: collapse; min-width: 820px; font-size: 13px; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 1; background: #f9fafb; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+    td.number { text-align: right; font-weight: 750; }
+    .empty { padding: 28px 16px; color: var(--muted); text-align: center; line-height: 1.5; }
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: min(360px, calc(100% - 36px));
+      padding: 13px 15px;
+      border-radius: 8px;
+      background: #102a27;
+      color: #fff;
+      box-shadow: var(--shadow);
+      transform: translateY(120%);
+      opacity: 0;
+      transition: 180ms ease;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 920px) {
+      header, .layout { grid-template-columns: 1fr; }
+      .clock { min-width: 0; }
+    }
+    @media (max-width: 620px) {
+      .app { width: min(100% - 20px, 1180px); padding-top: 16px; }
+      .quick-row, .service-grid, .breakdown { grid-template-columns: 1fr; }
+      .actions { display: grid; }
+      .button-group, .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>Rekap Pengiriman Marketplace</h1>
+        <p class="subtitle">Input jumlah pengiriman manual per marketplace, simpan riwayat, lalu ekspor CSV saat perlu dicocokkan dengan sistem.</p>
+      </div>
+      <div class="clock" aria-live="polite">
+        <span>Tanggal dan jam sekarang</span>
+        <strong id="liveClock">Memuat...</strong>
+      </div>
+    </header>
+
+    <section class="layout">
+      <div class="panel input-panel">
+        <div class="section-title">
+          <div>
+            <h2>Input Rekap</h2>
+            <p class="hint">Kolom kosong otomatis dihitung sebagai 0.</p>
+          </div>
+        </div>
+
+        <div class="market-tabs" role="tablist" aria-label="Marketplace">
+          <button class="tab active" type="button" data-market="Shopee">Shopee</button>
+          <button class="tab" type="button" data-market="TikTok">TikTok</button>
+        </div>
+
+        <div class="quick-row">
+          <label>
+            Marketplace
+            <select id="marketplaceSelect">
+              <option value="Shopee">Shopee</option>
+              <option value="TikTok">TikTok</option>
+            </select>
+          </label>
+          <label>
+            Catatan
+            <input id="noteInput" type="text" placeholder="Opsional, mis. shift pagi">
+          </label>
+        </div>
+
+        <form id="recapForm">
+          <div class="service-grid" id="serviceGrid"></div>
+          <div class="actions">
+            <button class="btn danger" type="button" id="resetFormBtn">Kosongkan</button>
+            <div class="button-group">
+              <button class="btn" type="button" id="exportBtn">Ekspor CSV</button>
+              <button class="btn primary" type="submit">Simpan Rekap</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <aside class="summary">
+        <div class="panel total-card">
+          <div class="breakdown">
+            <div class="metric"><span>Shopee hari ini</span><strong id="shopeeToday">0</strong></div>
+            <div class="metric"><span>TikTok hari ini</span><strong id="tiktokToday">0</strong></div>
+          </div>
+          <p class="hint" style="margin-top: 14px;">Total input saat ini</p>
+          <strong class="total-value" id="currentTotal">0</strong>
+          <p class="hint" id="activeMarketHint">Rincian Shopee hari ini</p>
+          <div class="service-summary" id="currentServiceSummary"></div>
+        </div>
+
+        <div class="panel history-panel">
+          <div class="history-head">
+            <div>
+              <h2>Riwayat</h2>
+              <p class="hint" id="historyCount">0 rekap tersimpan</p>
+            </div>
+            <button class="btn danger" type="button" id="clearHistoryBtn" title="Hapus semua riwayat">Hapus</button>
+          </div>
+          <div id="historyArea"></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const services = {
+      Shopee: [
+        "GrabExpress Instant",
+        "GrabExpress Instant Prioritas",
+        "SPX Instant",
+        "SPX Instant Prioritas",
+        "Gosend Instant",
+        "Gosend Instant Prioritas"
+      ],
+      TikTok: ["Grab", "Gojek", "Anteraja"]
+    };
+
+    const storageKey = "rekapPengirimanMarketplaceV1";
+    const grid = document.getElementById("serviceGrid");
+    const tabs = document.querySelectorAll(".tab");
+    const marketplaceSelect = document.getElementById("marketplaceSelect");
+    const form = document.getElementById("recapForm");
+    const currentTotal = document.getElementById("currentTotal");
+    const currentServiceSummary = document.getElementById("currentServiceSummary");
+    const activeMarketHint = document.getElementById("activeMarketHint");
+    const noteInput = document.getElementById("noteInput");
+    const historyArea = document.getElementById("historyArea");
+    const historyCount = document.getElementById("historyCount");
+    const shopeeToday = document.getElementById("shopeeToday");
+    const tiktokToday = document.getElementById("tiktokToday");
+    const toast = document.getElementById("toast");
+    let currentMarket = "Shopee";
+    let records = loadRecords();
+
+    function formatDateTime(date) {
+      return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(date);
+    }
+
+    function formatDateOnly(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function updateClock() {
+      document.getElementById("liveClock").textContent = formatDateTime(new Date());
+    }
+
+    function loadRecords() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveRecords() {
+      localStorage.setItem(storageKey, JSON.stringify(records));
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function setMarketplace(market) {
+      currentMarket = market;
+      marketplaceSelect.value = market;
+      tabs.forEach(tab => tab.classList.toggle("active", tab.dataset.market === market));
+      activeMarketHint.textContent = `Rincian ${market} hari ini`;
+      renderInputs();
+      updateCurrentTotal();
+      updateTodayMetrics();
+    }
+
+    function renderInputs() {
+      grid.innerHTML = "";
+      services[currentMarket].forEach(service => {
+        const wrap = document.createElement("div");
+        wrap.className = "service-input";
+        wrap.innerHTML = `<label>${service}<input type="number" inputmode="numeric" min="0" step="1" data-service="${service}" placeholder="0"></label>`;
+        grid.appendChild(wrap);
+      });
+    }
+
+    function getInputRows() {
+      return Array.from(grid.querySelectorAll("input")).map(input => ({
+        service: input.dataset.service,
+        qty: Math.max(0, Number.parseInt(input.value || "0", 10) || 0)
+      }));
+    }
+
+    function updateCurrentTotal() {
+      const rows = getInputRows();
+      const total = rows.reduce((sum, row) => sum + row.qty, 0);
+      currentTotal.textContent = total.toLocaleString("id-ID");
+    }
+
+    function sumByService(rows, matcher) {
+      return rows
+        .filter(row => matcher(row.service))
+        .reduce((sum, row) => sum + row.qty, 0);
+    }
+
+    function metricHtml(label, value) {
+      return `<div class="metric"><span>${label}</span><strong>${value.toLocaleString("id-ID")}</strong></div>`;
+    }
+
+    function getTodayRows(market) {
+      const today = formatDateOnly(new Date());
+      return records
+        .filter(record => record.date === today && record.marketplace === market)
+        .flatMap(record => record.items || []);
+    }
+
+    function renderSavedServiceSummary() {
+      const rows = getTodayRows(currentMarket);
+      currentServiceSummary.innerHTML = services[currentMarket]
+        .map(service => metricHtml(`${service} hari ini`, sumByService(rows, rowService => rowService === service)))
+        .join("");
+    }
+
+    function clearForm() {
+      grid.querySelectorAll("input").forEach(input => input.value = "");
+      noteInput.value = "";
+      updateCurrentTotal();
+    }
+
+    function renderHistory() {
+      historyCount.textContent = `${records.length} rekap tersimpan`;
+      if (!records.length) {
+        historyArea.innerHTML = '<div class="empty">Belum ada rekap yang disimpan.</div>';
+        updateTodayMetrics();
+        return;
+      }
+      const rows = [...records].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(record => {
+        const serviceText = record.items.filter(item => item.qty > 0).map(item => `${item.service}: ${item.qty}`).join(" | ") || "-";
+        return `
+          <tr>
+            <td>${formatDateTime(new Date(record.createdAt))}</td>
+            <td>${record.marketplace}</td>
+            <td>${record.note || "-"}</td>
+            <td>${serviceText}</td>
+            <td class="number">${record.total.toLocaleString("id-ID")}</td>
+            <td><button class="btn danger" type="button" data-delete="${record.id}">Hapus</button></td>
+          </tr>
+        `;
+      }).join("");
+      historyArea.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Waktu</th><th>Marketplace</th><th>Catatan</th><th>Rincian</th><th>Total</th><th>Aksi</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+      updateTodayMetrics();
+    }
+
+    function updateTodayMetrics() {
+      const today = formatDateOnly(new Date());
+      const totals = records.reduce((acc, record) => {
+        if (record.date === today) acc[record.marketplace] = (acc[record.marketplace] || 0) + record.total;
+        return acc;
+      }, {});
+      shopeeToday.textContent = (totals.Shopee || 0).toLocaleString("id-ID");
+      tiktokToday.textContent = (totals.TikTok || 0).toLocaleString("id-ID");
+      renderSavedServiceSummary();
+    }
+
+    function makeCsv() {
+      const lines = [["Tanggal", "Jam", "Marketplace", "Layanan", "Jumlah", "Catatan", "Total Rekap"]];
+      records.forEach(record => {
+        const created = new Date(record.createdAt);
+        const date = formatDateOnly(created);
+        const time = created.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+        record.items.forEach(item => lines.push([date, time, record.marketplace, item.service, item.qty, record.note || "", record.total]));
+      });
+      return lines.map(row => row.map(cell => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+    }
+
+    function exportCsv() {
+      if (!records.length) {
+        showToast("Belum ada data untuk diekspor.");
+        return;
+      }
+      const blob = new Blob([makeCsv()], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `rekap-pengiriman-${formatDateOnly(new Date())}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast("CSV berhasil dibuat.");
+    }
+
+    tabs.forEach(tab => tab.addEventListener("click", () => setMarketplace(tab.dataset.market)));
+    marketplaceSelect.addEventListener("change", event => setMarketplace(event.target.value));
+    grid.addEventListener("input", updateCurrentTotal);
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const items = getInputRows();
+      const total = items.reduce((sum, row) => sum + row.qty, 0);
+      if (total === 0) {
+        showToast("Isi minimal satu jumlah pengiriman dulu.");
+        return;
+      }
+      const now = new Date();
+      const record = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        createdAt: now.toISOString(),
+        date: formatDateOnly(now),
+        marketplace: currentMarket,
+        note: noteInput.value.trim(),
+        items,
+        total
+      };
+      records.push(record);
+      saveRecords();
+      clearForm();
+      renderHistory();
+      showToast("Rekap tersimpan.");
+    });
+    document.getElementById("resetFormBtn").addEventListener("click", clearForm);
+    document.getElementById("exportBtn").addEventListener("click", exportCsv);
+    document.getElementById("clearHistoryBtn").addEventListener("click", () => {
+      if (!records.length || !window.confirm("Hapus semua riwayat rekap?")) return;
+      records = [];
+      saveRecords();
+      renderHistory();
+      showToast("Riwayat dihapus.");
+    });
+    historyArea.addEventListener("click", event => {
+      const button = event.target.closest("[data-delete]");
+      if (!button) return;
+      records = records.filter(record => record.id !== button.dataset.delete);
+      saveRecords();
+      renderHistory();
+      showToast("Satu rekap dihapus.");
+    });
+
+    updateClock();
+    window.setInterval(updateClock, 1000);
+    setMarketplace("Shopee");
+    renderHistory();
+  </script>
+</body>
+</html>
